@@ -1,0 +1,62 @@
+/**
+ * @file main.c
+ * @brief Kernel entry point and high-level initialization.
+ *
+ * Reached from `entry.S` after the boot stack is set up. The order of
+ * initialization mirrors the Rust version:
+ *
+ *   clear_bss() -> logging -> device_tree -> mm -> trap -> timer -> tasks
+ *
+ * For now only `clear_bss` and a single console line are implemented; later
+ * stages will fill in the rest.
+ */
+
+#include "config.h"
+#include "sbi.h"
+
+// Symbols defined by linker.ld.
+extern char sbss[];
+extern char ebss[];
+
+/**
+ * @brief Clear the kernel .bss segment (excluding the boot stack).
+ *
+ * The boot stack lives in .bss.stack, which is placed *before* `sbss` by the
+ * linker script, so this loop never touches the stack we are currently running
+ * on.
+ */
+static void clear_bss() {
+    for (char* p = sbss; p < ebss; p++) {
+        *p = 0;
+    }
+}
+
+/**
+ * @brief Rust-style kernel entry point.
+ *
+ * @param hart_id Hard id passed by OpenSBI in a0.
+ * @param dtb_pa  Physical address of the device tree passed in a1.
+ * @return Never returns.
+ */
+[[noreturn]] void kernel_main([[maybe_unused]] usize hart_id, [[maybe_unused]] usize dtb_pa) {
+    clear_bss();
+
+    const char* banner =
+        "  ______   ______   ______   .______       _______   ______        _______.\n"
+        " /      | /      | /  __  \\  |   _  \\     |   ____| /  __  \\      /       |\n"
+        "|  ,----'|  ,----'|  |  |  | |  |_)  |    |  |__   |  |  |  |    |   (----`\n"
+        "|  |     |  |     |  |  |  | |      /     |   __|  |  |  |  |     \\   \\\n"
+        "|  `----.|  `----.|  `--'  | |  |\\  \\----.|  |____ |  `--'  | .----)   |\n"
+        " \\______| \\______| \\______/  | _| `._____||_______| \\______/  |_______/\n";
+
+    for (const char* p = banner; *p != '\0'; p++) {
+        console_putchar((usize)*p);
+    }
+
+    const char* msg = "[kernel] Welcome to cCoreOS!\n";
+    for (const char* p = msg; *p != '\0'; p++) {
+        console_putchar((usize)*p);
+    }
+
+    shutdown(0);
+}

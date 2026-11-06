@@ -1,0 +1,151 @@
+# --- Basic settings ---
+Language: Cpp
+BasedOnStyle: LLVM
+Standard: c++17
+
+# --- Line endings (newlines = lf) ---
+DeriveLineEnding: false
+UseCRLF: false
+
+# --- Indentation (indent_columns / indent_with_tabs / input_tab_size) ---
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+IndentCaseLabels: true
+IndentCaseBlocks: false
+IndentPPDirectives: None
+IndentWrappedFunctionNames: true
+NamespaceIndentation: All
+AccessModifierOffset: -4
+
+# --- Line width (code_width = 100) ---
+ColumnLimit: 100
+
+# --- Blank lines (nl_max = 2) ---
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+# --- Automatic blank lines between definitions ---
+SeparateDefinitionBlocks: Always
+
+# --- Brace style ---
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterExternBlock: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterObjCDeclaration: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+# --- Pointers and references ---
+PointerAlignment: Left
+ReferenceAlignment: Left
+DerivePointerAlignment: false
+SpaceAroundPointerQualifiers: Default
+QualifierAlignment: Leave
+
+# --- Spacing rules ---
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles: false
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeRangeBasedForLoopColon: true
+SpacesInContainerLiterals: true
+Cpp11BracedListStyle: false
+BitFieldColonSpacing: Both
+
+# --- Brackets and continuation alignment ---
+AlignAfterOpenBracket: BlockIndent
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: false
+AlignEscapedNewlines: Left
+
+# --- Short code blocks ---
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: None
+AllowShortLoopsOnASingleLine: false
+
+# --- Templates and line breaks ---
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: true
+BreakStringLiterals: true
+
+# --- Argument packing ---
+BinPackArguments: false
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+
+# --- Constructor initializer lists ---
+AllowAllConstructorInitializersOnNextLine: true
+PackConstructorInitializers: Never
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: AfterColon
+
+# --- Alignment options (all disabled) ---
+AlignConsecutiveAssignments: false
+AlignConsecutiveBitFields: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: false
+
+# --- Lambda ---
+LambdaBodyIndentation: OuterScope
+
+# --- Enforce braces (mod_full_brace_* = force) ---
+InsertBraces: true
+
+# --- Include sorting ---
+SortIncludes: CaseSensitive
+SortUsingDeclarations: true
+IncludeBlocks: Preserve
+IncludeCategories:
+  - Regex: '^<.*\.h>'
+    Priority: 1
+  - Regex: '^<.*>'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+
+# --- Comments ---
+ReflowComments: false
+SpacesBeforeTrailingComments: 2
+FixNamespaceComments: false
+CommentPragmas: '^ NOLINT|^ clang-format'
+
+# --- Blank lines before/after access modifiers ---
+EmptyLineBeforeAccessModifier: Leave
+EmptyLineAfterAccessModifier: Never
+
+# --- Newline at end of file ---
+InsertNewlineAtEOF: true
+
+# --- Line break penalties: prefer wrapping parameters rather than putting the return type on its own line ---
+PenaltyReturnTypeOnItsOwnLine: 10000
+PenaltyBreakBeforeFirstCallParameter: 1
