@@ -6,6 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(KERNEL_SOURCES
     src/entry.S
+    src/console.c
     src/main.c
     src/sbi.c
 )

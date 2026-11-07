@@ -7,8 +7,8 @@
  * ID in a7/a6.
  */
 
-#ifndef __SBI_H__
-#define __SBI_H__
+#ifndef __SBI_H_
+#define __SBI_H_
 
 #include "config.h"
 
@@ -17,14 +17,14 @@
  *
  * @param c Character (expected to be a byte; only ASCII is correct).
  */
-void console_putchar(usize c);
+void sbi_console_putchar(usize c);
 
 /**
  * @brief Program the next timer interrupt.
  *
  * @param timer Absolute `mtime` tick at which the timer should fire.
  */
-void set_timer(usize timer);
+void sbi_set_timer(usize timer);
 
 /**
  * @brief Shut down the machine via SBI SRST extension.
@@ -32,6 +32,6 @@ void set_timer(usize timer);
  * @param failure If true, report `SystemFailure`; otherwise `NoReason`.
  * @return Never returns.
  */
-[[noreturn]] void shutdown(int failure);
+[[noreturn]] void sbi_shutdown(int failure);
 
-#endif /* __SBI_H__ */
+#endif /* __SBI_H_ */

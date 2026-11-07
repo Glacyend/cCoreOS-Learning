@@ -37,15 +37,15 @@ static inline long sbi_call(usize ext, usize fid, usize arg0, usize arg1, usize 
     return (long)a0;
 }
 
-void console_putchar(usize c) {
+void sbi_console_putchar(usize c) {
     sbi_call(SBI_EXT_LEGACY_CONSOLE_PUTCHAR, 0, c, 0, 0);
 }
 
-void set_timer(usize timer) {
+void sbi_set_timer(usize timer) {
     sbi_call(SBI_EXT_TIME, 0, timer, 0, 0);
 }
 
-[[noreturn]] void shutdown(int failure) {
+[[noreturn]] void sbi_shutdown(int failure) {
     usize reason = failure ? SBI_SRST_RESET_REASON_SYSTEM_FAILURE : SBI_SRST_RESET_REASON_NO_REASON;
     sbi_call(SBI_EXT_SRST, 0, SBI_SRST_RESET_TYPE_SHUTDOWN, reason, 0);
     // unreachable

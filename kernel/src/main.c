@@ -12,6 +12,7 @@
  */
 
 #include "config.h"
+#include "console.h"
 #include "sbi.h"
 
 // Symbols defined by linker.ld.
@@ -49,14 +50,9 @@ static void clear_bss() {
         "|  `----.|  `----.|  `--'  | |  |\\  \\----.|  |____ |  `--'  | .----)   |\n"
         " \\______| \\______| \\______/  | _| `._____||_______| \\______/  |_______/\n";
 
-    for (const char* p = banner; *p != '\0'; p++) {
-        console_putchar((usize)*p);
-    }
+    println("%s", banner);
 
-    const char* msg = "[kernel] Welcome to cCoreOS!\n";
-    for (const char* p = msg; *p != '\0'; p++) {
-        console_putchar((usize)*p);
-    }
+    println("[kernel] Welcome to cCoreOS!");
 
-    shutdown(0);
+    sbi_shutdown(0);
 }
