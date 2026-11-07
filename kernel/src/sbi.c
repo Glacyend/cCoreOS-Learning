@@ -49,5 +49,5 @@ void sbi_set_timer(usize timer) {
     usize reason = failure ? SBI_SRST_RESET_REASON_SYSTEM_FAILURE : SBI_SRST_RESET_REASON_NO_REASON;
     sbi_call(SBI_EXT_SRST, 0, SBI_SRST_RESET_TYPE_SHUTDOWN, reason, 0);
     // unreachable
-    while (true) {}
+    __builtin_unreachable();
 }

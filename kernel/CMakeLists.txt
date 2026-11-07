@@ -12,7 +12,12 @@ set(KERNEL_SOURCES
     src/main.c
     src/panic.c
     src/sbi.c
+    src/syscall/fs.c
+    src/syscall/process.c
+    src/syscall/syscall.c
     src/timer.c
+    src/trap/trap.c
+    src/trap/trap.S
 )
 
 set(KERNEL_ELF ${CMAKE_BINARY_DIR}/kernel.elf)

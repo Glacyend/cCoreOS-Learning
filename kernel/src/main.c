@@ -18,6 +18,7 @@
 #include "panic.h"
 #include "sbi.h"
 #include "timer.h"
+#include "trap/trap.h"
 
 // Symbols defined by linker.ld.
 extern char sbss[];
@@ -64,6 +65,8 @@ static void clear_bss() {
     if (device_tree_init(dtb_pa) != 0) {
         panic("[kernel] Device tree init failed.");
     }
+
+    trap_init();
 
     timer_set_next_trigger();
 
