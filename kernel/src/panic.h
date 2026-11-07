@@ -31,7 +31,7 @@
  *
  * Usage: `assert(ptr != NULL);`
  */
-#define assert(cond)                              \
+#define assert_panic(cond)                              \
     do {                                          \
         if (!(cond)) {                            \
             panic("assertion failed: %s", #cond); \

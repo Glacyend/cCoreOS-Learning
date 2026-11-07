@@ -5,12 +5,14 @@ set(CMAKE_C_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(KERNEL_SOURCES
-    src/entry.S
     src/console.c
+    src/device_tree.c
+    src/entry.S
     src/logging.c
     src/main.c
     src/panic.c
     src/sbi.c
+    src/timer.c
 )
 
 set(KERNEL_ELF ${CMAKE_BINARY_DIR}/kernel.elf)

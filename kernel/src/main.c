@@ -13,8 +13,11 @@
 
 #include "config.h"
 #include "console.h"
+#include "device_tree.h"
 #include "logging.h"
+#include "panic.h"
 #include "sbi.h"
+#include "timer.h"
 
 // Symbols defined by linker.ld.
 extern char sbss[];
@@ -57,6 +60,12 @@ static void clear_bss() {
     println("%s", banner);
 
     println("[kernel] Welcome to cCoreOS!");
+
+    if (device_tree_init(dtb_pa) != 0) {
+        panic("[kernel] Device tree init failed.");
+    }
+
+    timer_set_next_trigger();
 
     sbi_shutdown(false);
 }
