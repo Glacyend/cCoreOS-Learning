@@ -9,7 +9,7 @@
 #ifndef __CONSOLE_H_
 #define __CONSOLE_H_
 
-#include "stdarg.h"
+#include <stdarg.h>
 
 /**
  * @brief Write one character to the console.
