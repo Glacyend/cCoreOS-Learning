@@ -21,15 +21,7 @@ typedef struct {
     alignas(4096) char data[KERNEL_STACK_SIZE];
 } KernelStack;
 
-/**
- * @brief One user stack per app, 4 KiB-aligned.
- */
-typedef struct {
-    alignas(4096) char data[USER_STACK_SIZE];
-} UserStack;
-
 static KernelStack global_kernel_stack[MAX_APP_NUM];
-[[maybe_unused]] static UserStack global_user_stack[MAX_APP_NUM];
 
 static usize global_current_app = 0;
 
@@ -37,8 +29,8 @@ static usize kernel_stack_top(usize app_id) {
     return (usize)&global_kernel_stack[app_id].data[KERNEL_STACK_SIZE];
 }
 
-[[maybe_unused]] static usize user_stack_top(usize app_id) {
-    return (usize)&global_user_stack[app_id].data[USER_STACK_SIZE];
+static usize user_stack_top(usize app_id) {
+    return APP_BASE_ADDRESS + (app_id + 1) * APP_SIZE_LIMIT;
 }
 
 /**
@@ -92,12 +84,11 @@ static void init_trap_context(TrapContext* cx, usize entry, usize sp) {
     loader_load_app(app_id);
 
     TrapContext cx;
-    init_trap_context(&cx, APP_BASE_ADDRESS, user_stack_top(app_id));
+    usize entry = APP_BASE_ADDRESS + app_id * APP_SIZE_LIMIT;
+    init_trap_context(&cx, entry, user_stack_top(app_id));
     usize cx_addr = push_trap_context(app_id, &cx);
 
-    info(
-        "[kernel] Running app %lu at 0x%lX", (unsigned long)app_id, (unsigned long)APP_BASE_ADDRESS
-    );
+    info("[kernel] Running app %lu at 0x%lX", (unsigned long)app_id, (unsigned long)entry);
 
     __restore(cx_addr);
 }
