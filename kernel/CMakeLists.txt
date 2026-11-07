@@ -5,9 +5,11 @@ set(CMAKE_C_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(KERNEL_SOURCES
+    embed_apps.S
     src/console.c
     src/device_tree.c
     src/entry.S
+    src/loader.c
     src/logging.c
     src/main.c
     src/panic.c
@@ -15,6 +17,7 @@ set(KERNEL_SOURCES
     src/syscall/fs.c
     src/syscall/process.c
     src/syscall/syscall.c
+    src/task/task.c
     src/timer.c
     src/trap/trap.c
     src/trap/trap.S

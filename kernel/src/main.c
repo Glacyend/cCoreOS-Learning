@@ -16,7 +16,7 @@
 #include "device_tree.h"
 #include "logging.h"
 #include "panic.h"
-#include "sbi.h"
+#include "task/task.h"
 #include "timer.h"
 #include "trap/trap.h"
 
@@ -70,5 +70,5 @@ static void clear_bss() {
 
     timer_set_next_trigger();
 
-    sbi_shutdown(false);
+    task_run_next_app();
 }

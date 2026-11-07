@@ -68,4 +68,13 @@ static inline void kernel_stack_position(usize app_id, usize* bottom, usize* top
 /** @brief Milliseconds per second, used by `get_time_ms`. */
 #define MSEC_PER_SEC 1000
 
+/** @brief Maximum number of applications statically embedded. */
+#define MAX_APP_NUM 4
+
+/** @brief Base address where every app is loaded. */
+#define APP_BASE_ADDRESS 0x80400000ul
+
+/** @brief Fixed slot size per app; apps must fit within it. */
+#define APP_SIZE_LIMIT 0x20000ul
+
 #endif /* __CONFIG_H_ */
