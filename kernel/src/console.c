@@ -79,10 +79,7 @@ static void print_pointer(unsigned long value) {
     }
 }
 
-void console_printf(const char* fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-
+void console_vprintf(const char* fmt, va_list ap) {
     while (*fmt != '\0') {
         if (*fmt != '%') {
             console_putchar(*fmt++);
@@ -224,6 +221,11 @@ void console_printf(const char* fmt, ...) {
         }
         fmt++;
     }
+}
 
+void console_printf(const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    console_vprintf(fmt, ap);
     va_end(ap);
 }

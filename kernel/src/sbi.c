@@ -45,7 +45,7 @@ void sbi_set_timer(usize timer) {
     sbi_call(SBI_EXT_TIME, 0, timer, 0, 0);
 }
 
-[[noreturn]] void sbi_shutdown(int failure) {
+[[noreturn]] void sbi_shutdown(bool failure) {
     usize reason = failure ? SBI_SRST_RESET_REASON_SYSTEM_FAILURE : SBI_SRST_RESET_REASON_NO_REASON;
     sbi_call(SBI_EXT_SRST, 0, SBI_SRST_RESET_TYPE_SHUTDOWN, reason, 0);
     // unreachable

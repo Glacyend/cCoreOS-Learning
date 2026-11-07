@@ -13,6 +13,7 @@
 
 #include "config.h"
 #include "console.h"
+#include "logging.h"
 #include "sbi.h"
 
 // Symbols defined by linker.ld.
@@ -41,6 +42,9 @@ static void clear_bss() {
  */
 [[noreturn]] void kernel_main([[maybe_unused]] usize hart_id, [[maybe_unused]] usize dtb_pa) {
     clear_bss();
+    log_init();
+
+    trace("[kernel] Start running.");
 
     const char* banner =
         "  ______   ______   ______   .______       _______   ______        _______.\n"
@@ -54,5 +58,5 @@ static void clear_bss() {
 
     println("[kernel] Welcome to cCoreOS!");
 
-    sbi_shutdown(0);
+    sbi_shutdown(false);
 }

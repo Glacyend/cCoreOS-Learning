@@ -7,7 +7,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(KERNEL_SOURCES
     src/entry.S
     src/console.c
+    src/logging.c
     src/main.c
+    src/panic.c
     src/sbi.c
 )
 

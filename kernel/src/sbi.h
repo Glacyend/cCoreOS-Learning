@@ -32,6 +32,6 @@ void sbi_set_timer(usize timer);
  * @param failure If true, report `SystemFailure`; otherwise `NoReason`.
  * @return Never returns.
  */
-[[noreturn]] void sbi_shutdown(int failure);
+[[noreturn]] void sbi_shutdown(bool failure);
 
 #endif /* __SBI_H_ */

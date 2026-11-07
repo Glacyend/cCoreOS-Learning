@@ -9,6 +9,8 @@
 #ifndef __CONSOLE_H_
 #define __CONSOLE_H_
 
+#include "stdarg.h"
+
 /**
  * @brief Write one character to the console.
  *
@@ -22,6 +24,17 @@ void console_putchar(char c);
  * @param s String to print.
  */
 void console_write(const char* s);
+
+/**
+ * @brief `va_list` form of @ref console_printf .
+ *
+ * Used by wrappers such as the logging system, which forward their own
+ * `va_list`.
+ *
+ * @param fmt Format string.
+ * @param ap  Argument list.
+ */
+void console_vprintf(const char* fmt, va_list ap);
 
 /**
  * @brief Formatted output to the console.

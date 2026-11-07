@@ -42,7 +42,7 @@ typedef int64_t isize;
 #define TRAMPOLINE (UINT64_MAX - PAGE_SIZE + 1)
 
 /** @brief Virtual address of the current task's `TrapContext`. */
-#define TRAP_CONTEXT (TRAMPOLINE + PAGE_SIZE)
+#define TRAP_CONTEXT (TRAMPOLINE - PAGE_SIZE)
 
 /** @brief End of usable physical memory on QEMU virt (128 MiB). */
 #define MEMORY_END 0x88000000ul
