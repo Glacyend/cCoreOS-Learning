@@ -29,4 +29,24 @@ usize loader_get_num_app();
  */
 void loader_load_app(usize app_id);
 
+/**
+ * @brief Copy every embedded app into its slot.
+ *
+ * Must be called once before any task runs.
+ */
+void loader_load_apps();
+
+/**
+ * @brief Initialize a `TrapContext` for app @p app_id and push it onto that
+ *        app's kernel stack.
+ *
+ * The entry point is `APP_BASE_ADDRESS + app_id * APP_SIZE_LIMIT`; the user
+ * stack comes from the tail of that app's slot.
+ *
+ * @param app_id App index, 0-based.
+ * @return Address of the `TrapContext` on the kernel stack, suitable as the
+ *         `sp` for a `TaskContext` whose `ra` is `__restore`.
+ */
+usize loader_init_app_cx(usize app_id);
+
 #endif /* __LOADER_H_ */

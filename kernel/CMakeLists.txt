@@ -17,6 +17,7 @@ set(KERNEL_SOURCES
     src/syscall/fs.c
     src/syscall/process.c
     src/syscall/syscall.c
+    src/task/switch.S
     src/task/task.c
     src/timer.c
     src/trap/trap.c

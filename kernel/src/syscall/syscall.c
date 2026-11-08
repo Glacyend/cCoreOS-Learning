@@ -18,8 +18,7 @@ isize syscall_dispatch(usize id, usize arg0, usize arg1, usize arg2) {
             sys_exit((int)arg0);
         }
         case SYSCALL_YIELD: {
-            // TODO
-            return 0;
+            return sys_yield();
         }
         case SYSCALL_GET_TIME: {
             // TODO

@@ -5,10 +5,10 @@
  * Reached from `entry.S` after the boot stack is set up. The order of
  * initialization mirrors the Rust version:
  *
- *   clear_bss() -> logging -> device_tree -> mm -> trap -> timer -> tasks
+ *   clear_bss() -> logging -> device_tree -> mm -> trap -> timer -> task_init
  *
- * For now only `clear_bss` and a single console line are implemented; later
- * stages will fill in the rest.
+ * Cooperative round-robin scheduler. Every app is loaded once at startup, then
+ * tasks switch on `sys_yield`/`sys_exit`.
  */
 
 #include "config.h"
@@ -70,5 +70,6 @@ static void clear_bss() {
 
     timer_set_next_trigger();
 
-    task_run_next_app();
+    task_init();
+    run_first_task();
 }

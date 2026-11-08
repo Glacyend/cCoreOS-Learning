@@ -1,4 +1,5 @@
 #include "console.h"
+#include "lib.h"
 
 #define MAX_EXP 10000
 
@@ -12,8 +13,10 @@ int main() {
         power[i] = power[i - 1] * 7 % mod;
         if (i % 1000 == 0) {
             printf("7^%d = %d\n", i, power[i]);
+            yield();
         }
     }
 
+    printf("App 01 done!\n");
     return 0;
 }
