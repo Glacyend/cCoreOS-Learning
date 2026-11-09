@@ -11,7 +11,7 @@ int main() {
         user_yield();
     }
 
-    user_printf("App 01: woke up at %lu ms!\n", (unsigned long)user_get_time());
-    user_printf("App 01: done!\n");
+    user_printf("App 01: Woke up at %lu ms!\n", (unsigned long)user_get_time());
+    user_printf("App 01: Done!\n");
     return 0;
 }
