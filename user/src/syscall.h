@@ -18,5 +18,6 @@ typedef long isize;
 isize sys_write(usize fd, const char* buf, usize len);
 [[noreturn]] void sys_exit(int code);
 isize sys_yield();
+isize sys_get_time();
 
 #endif /* __USER_SYSCALL_H_ */

@@ -1,7 +1,7 @@
 set(USER_PROGRAMS
-    00_hello
-    01_power_7
-    02_power_5
+    00_sleep_3
+    01_sleep_5
+    02_bubble_sort
     03_power_13
 )
 

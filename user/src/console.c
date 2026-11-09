@@ -54,6 +54,11 @@ static void print_signed(long value) {
     }
 }
 
+static void print_pointer(unsigned long value) {
+    user_puts("0x");
+    print_unsigned(value, 16, true);
+}
+
 void user_printf(const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
@@ -62,32 +67,42 @@ void user_printf(const char* fmt, ...) {
             putchar(*fmt++);
             continue;
         }
-        fmt++;
+        fmt++;  // skip `%`
+        if (*fmt == '\0') {
+            putchar('%');
+            break;
+        }
+
         switch (*fmt) {
             case 'c': {
-                putchar((char)va_arg(ap, int));
+                int c = va_arg(ap, int);
+                putchar((char)c);
                 break;
             }
             case 's': {
-                const char* str = va_arg(ap, const char*);
-                user_puts(str != NULL ? str : "(null)");
+                const char* s = va_arg(ap, const char*);
+                user_puts(s != NULL ? s : "(null)");
                 break;
             }
             case 'd':
             case 'i': {
-                print_signed(va_arg(ap, int));
+                print_signed((long)va_arg(ap, int));
                 break;
             }
             case 'u': {
-                print_unsigned(va_arg(ap, unsigned int), 10, false);
+                print_unsigned((unsigned long)va_arg(ap, unsigned int), 10, false);
                 break;
             }
             case 'x': {
-                print_unsigned(va_arg(ap, unsigned int), 16, false);
+                print_unsigned((unsigned long)va_arg(ap, unsigned int), 16, false);
                 break;
             }
             case 'X': {
-                print_unsigned(va_arg(ap, unsigned int), 16, true);
+                print_unsigned((unsigned long)va_arg(ap, unsigned int), 16, true);
+                break;
+            }
+            case 'p': {
+                print_pointer((unsigned long)va_arg(ap, void*));
                 break;
             }
             case 'l': {
@@ -110,8 +125,68 @@ void user_printf(const char* fmt, ...) {
                         print_unsigned(va_arg(ap, unsigned long), 16, true);
                         break;
                     }
+                    case 'l': {
+                        fmt++;
+                        switch (*fmt) {
+                            case 'd':
+                            case 'i': {
+                                print_signed((long)va_arg(ap, long long));
+                                break;
+                            }
+                            case 'u': {
+                                print_unsigned(
+                                    (unsigned long)va_arg(ap, unsigned long long), 10, false
+                                );
+                                break;
+                            }
+                            case 'x': {
+                                print_unsigned(
+                                    (unsigned long)va_arg(ap, unsigned long long), 16, false
+                                );
+                                break;
+                            }
+                            case 'X': {
+                                print_unsigned(
+                                    (unsigned long)va_arg(ap, unsigned long long), 16, true
+                                );
+                                break;
+                            }
+                            default: {
+                                user_puts("%ll?");
+                                break;
+                            }
+                        }
+                        break;
+                    }
                     default: {
                         user_puts("%l?");
+                        break;
+                    }
+                }
+                break;
+            }
+            case 'z': {
+                fmt++;
+                switch (*fmt) {
+                    case 'u': {
+                        print_unsigned((unsigned long)va_arg(ap, usize), 10, false);
+                        break;
+                    }
+                    case 'd':
+                    case 'i': {
+                        print_signed((long)va_arg(ap, isize));
+                        break;
+                    }
+                    case 'x': {
+                        print_unsigned((unsigned long)va_arg(ap, usize), 16, false);
+                        break;
+                    }
+                    case 'X': {
+                        print_unsigned((unsigned long)va_arg(ap, usize), 16, true);
+                        break;
+                    }
+                    default: {
+                        user_puts("%z?");
                         break;
                     }
                 }

@@ -26,3 +26,7 @@ isize sys_write(usize fd, const char* buf, usize len) {
 isize sys_yield() {
     return syscall(SYSCALL_YIELD, 0, 0, 0);
 }
+
+isize sys_get_time() {
+    return syscall(SYSCALL_GET_TIME, 0, 0, 0);
+}

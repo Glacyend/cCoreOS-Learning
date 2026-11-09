@@ -9,6 +9,6 @@
 #include <stdarg.h>
 
 void user_panic(const char* msg) {
-    printf("panic: %s\n", msg);
-    exit(1);
+    user_printf("panic: %s\n", msg);
+    user_exit(1);
 }

@@ -16,6 +16,15 @@
 void trap_init();
 
 /**
+ * @brief Enable the supervisor timer interrupt in `sie`.
+ *
+ * Sets `sie.STIE = 1`. After this, a `SupervisorTimer` interrupt fires once
+ * `mtime >= mtimecmp` and `sstatus.SIE = 1` (i.e. while running in U-mode with
+ * interrupts enabled by `sret`).
+ */
+void trap_enable_timer_interrupt();
+
+/**
  * @brief Dispatch a trap.
  *
  * Called from `__alltraps` with `a0 = &TrapContext`.

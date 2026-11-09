@@ -63,6 +63,7 @@ usize loader_init_app_cx(usize app_id) {
     usize sstatus;
     __asm__ volatile("csrr %0, sstatus" : "=r"(sstatus));
     sstatus &= ~(1ul << 8);
+    sstatus |= (1ul << 5);
 
     for (int i = 0; i < 32; i++) {
         cx.x[i] = 0;
