@@ -9,15 +9,19 @@
 #include "../config.h"
 
 /**
- * @brief Write @p len bytes from @p buf to file descriptor @p fd .
+ * @brief Write `buf` of length `len` to a file with `fd`.
  *
- * Only `fd == 1` (stdout) is supported.
+ * Rust equivalent: `sys_write`. Only `fd == 1` (stdout) is supported.
+ *
+ * The buffer is translated page by page through the current task's page table,
+ * because the kernel runs under the kernel page table while `buf` is a user
+ * virtual address.
  *
  * @param fd  File descriptor.
  * @param buf Buffer to read from.
  * @param len Number of bytes to read.
- * @return Number of bytes written, or -1 an error.
+ * @return `len` on success, or -1 on error.
  */
-isize sys_write(usize fd, const char* buf, usize len);
+isize sys_write(usize fd, const uint8_t* buf, usize len);
 
 #endif /* __SYSCALL_FS_H_ */

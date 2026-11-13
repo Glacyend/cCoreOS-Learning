@@ -6,20 +6,33 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(KERNEL_SOURCES
     embed_apps.S
+    src/boards/qemu.c
+    src/config.c
     src/console.c
     src/device_tree.c
     src/entry.S
     src/loader.c
     src/logging.c
     src/main.c
+    src/mm/address.c
+    src/mm/elf.c
+    src/mm/frame_allocator.c
+    src/mm/heap_allocator.c
+    src/mm/map.c
+    src/mm/memory_set.c
+    src/mm/page_table.c
+    src/mm/vec.c
     src/panic.c
     src/sbi.c
     src/syscall/fs.c
     src/syscall/process.c
     src/syscall/syscall.c
+    src/task/context.c
     src/task/switch.S
     src/task/task.c
+    src/task/task_inner.c
     src/timer.c
+    src/trap/context.c
     src/trap/trap.c
     src/trap/trap.S
 )

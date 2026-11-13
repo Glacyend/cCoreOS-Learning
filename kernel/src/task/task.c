@@ -1,116 +1,228 @@
 /**
  * @file task.c
- * @brief Task management: cooperative round-robin scheduler.
+ * @brief Task management implementation.
  */
 
 #include "task.h"
-#include "../config.h"
 #include "../loader.h"
 #include "../logging.h"
+#include "../mm/slice.h"
+#include "../mm/vec.h"
+#include "../panic.h"
 #include "../sbi.h"
+#include "../trap/context.h"
 #include "context.h"
 #include "switch.h"
+#include "task_inner.h"
 
-typedef enum {
-    TASK_READY,
-    TASK_RUNNING,
-    TASK_EXITED,
-} TaskStatus;
-
+/**
+ * @brief The task manager inner.
+ *
+ * Rust equivalent: `TaskManagerInner`.
+ */
 typedef struct {
-    TaskStatus status;
-    TaskContext cx;
-} TaskControlBlock;
+    /** @brief Task list. */
+    Vector tasks;
 
-typedef struct {
-    usize num_app;
+    /** @brief Id of current `TASK_STATUS_RUNNING` task. */
     usize current_task;
-    TaskControlBlock tasks[MAX_APP_NUM];
+} TaskManagerInner;
+
+/**
+ * @brief The task manager, where all the tasks are managed.
+ *
+ * Rust equivalent: `TaskManager`. In C, the `UPSafeCell` wrapper is dropped
+ * and the inner value is accessed directly; this is safe on a single core with
+ * cooperative scheduling.
+ */
+typedef struct {
+    /** @brief Total number of tasks. */
+    usize num_app;
+
+    /** @brief Inner value. */
+    TaskManagerInner inner;
 } TaskManager;
 
+/**
+ * @brief Global task manager.
+ *
+ * Rust equivalent: `TASK_MANAGER`, lazily initialized by `lazy_static!`. C
+ * requires an explicit @ref task_init call before use.
+ */
 static TaskManager global_task_manager;
+static bool global_task_manager_initialized = false;
 
-/** @brief Provided by trap.S. */
-extern char __restore[];
-
-static TaskContext tc_goto_restore(usize cx_addr) {
-    TaskContext cx;
-    cx.ra = (usize)__restore;
-    cx.sp = cx_addr;
-    for (int i = 0; i < 12; i++) {
-        cx.s[i] = 0;
+/**
+ * @brief Find the next to run and return task id.
+ *
+ * In this case, we only return the first `TASK_STATUS_READY` task in the task
+ * list.
+ *
+ * Rust equivalent: `TaskManager::find_next_task`.
+ */
+static void task_manager_find_next_task(TaskManager* manager, bool* found, usize* out) {
+    usize current = manager->inner.current_task;
+    usize num = manager->num_app;
+    for (usize i = 1; i <= num; i++) {
+        usize id = (current + i) % num;
+        TaskControlBlock* task = (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, id);
+        if (task->task_status == TASK_STATUS_READY) {
+            *found = true;
+            *out = id;
+            return;
+        }
     }
-    return cx;
+    *found = false;
+}
+
+/**
+ * @brief Change the status of current `TASK_STATUS_RUNNING` task into
+ *        `TASK_STATUS_READY`.
+ *
+ * Rust equivalent: `TaskManager::mark_current_suspended`.
+ */
+static void task_manager_mark_current_suspended(TaskManager* manager) {
+    usize current = manager->inner.current_task;
+    TaskControlBlock* task = (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, current);
+    task->task_status = TASK_STATUS_READY;
+}
+
+/**
+ * @brief Change the status of current `TASK_STATUS_RUNNING` task into
+ *        `TASK_STATUS_READY`.
+ *
+ * Rust equivalent: `TaskManager::mark_current_exited`.
+ */
+static void task_manager_mark_current_exited(TaskManager* manager) {
+    usize current = manager->inner.current_task;
+    TaskControlBlock* task = (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, current);
+    task->task_status = TASK_STATUS_EXITED;
+}
+
+/**
+ * @brief Get the current `TASK_STATUS_RUNNING` task's token.
+ *
+ * Rust equivalent: `TaskManager::get_current_token`.
+ */
+static usize task_manager_get_current_token(TaskManager* manager) {
+    usize current = manager->inner.current_task;
+    TaskControlBlock* task = (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, current);
+    return task_control_block_get_user_token(task);
+}
+
+/**
+ * @brief Get the current `TASK_STATUS_RUNNING` task's `TrapContext`.
+ *
+ * Rust equivalent: `TaskManager::get_current_trap_cx`.
+ */
+static TrapContext* task_manager_get_current_trap_cx(TaskManager* manager) {
+    usize current = manager->inner.current_task;
+    TaskControlBlock* task = (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, current);
+    return task_control_block_get_trap_cx(task);
+}
+
+/**
+ * @brief Change the current `TASK_STATUS_RUNNING` task's program break.
+ *
+ * Rust equivalent: `TaskManager::change_current_program_brk`.
+ */
+static bool task_manager_change_current_program_brk(
+    TaskManager* manager, int32_t size, usize* out
+) {
+    usize current = manager->inner.current_task;
+    TaskControlBlock* task = (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, current);
+    return task_control_block_change_program_brk(task, size, out);
+}
+
+/**
+ * @brief Switch current `TASK_STATUS_RUNNING` task to the task we have found,
+ *        or there is no `TASK_STATUS_READY` task and we can exit with all
+ *        applications completed.
+ *
+ * Rust equivalent: `TaskManager::run_next_task`.
+ */
+static void task_manager_run_next_task(TaskManager* manager) {
+    bool found;
+    usize next;
+    task_manager_find_next_task(manager, &found, &next);
+    if (found) {
+        usize current = manager->inner.current_task;
+        TaskControlBlock* next_task = (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, next);
+        next_task->task_status = TASK_STATUS_RUNNING;
+        manager->inner.current_task = next;
+        TaskControlBlock* current_task =
+            (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, current);
+        __switch(&current_task->task_cx, &next_task->task_cx);
+        // go back to user mode
+    } else {
+        info("[kernel] All applications completed!");
+        sbi_shutdown(false);
+    }
+}
+
+/**
+ * @brief Run the first task in task list.
+ *
+ * Rust equivalent: `TaskManager::run_first_task`.
+ */
+[[noreturn]] static void task_manager_run_first_task(TaskManager* manager) {
+    TaskControlBlock* first_task = (TaskControlBlock*)vec_get_mut(&manager->inner.tasks, 0);
+    first_task->task_status = TASK_STATUS_RUNNING;
+    TaskContext unused = task_context_zero_init();
+    __switch(&unused, &first_task->task_cx);
+    // unreachable
+    __builtin_unreachable();
 }
 
 void task_init() {
-    loader_load_apps();
-
-    global_task_manager.num_app = loader_get_num_app();
-    global_task_manager.current_task = 0;
-
-    for (usize i = 0; i < global_task_manager.num_app; i++) {
-        usize cx_addr = loader_init_app_cx(i);
-        global_task_manager.tasks[i].cx = tc_goto_restore(cx_addr);
-        global_task_manager.tasks[i].status = TASK_READY;
+    if (global_task_manager_initialized) {
+        return;
     }
-
-    trace("[kernel] task_init: %lu task(s) ready.", (unsigned long)global_task_manager.num_app);
-}
-
-static bool find_next_task(usize* out) {
-    usize current = global_task_manager.current_task;
-    usize num = global_task_manager.num_app;
-    for (usize i = 1; i <= num; i++) {
-        usize id = (current + i) % num;
-        if (global_task_manager.tasks[id].status == TASK_READY) {
-            *out = id;
-            return true;
+    trace("init TASK_MANAGER");
+    usize num_app = loader_get_num_app();
+    trace("num_app = %zu", num_app);
+    global_task_manager.num_app = num_app;
+    vec_init(&global_task_manager.inner.tasks, sizeof(TaskControlBlock));
+    for (usize i = 0; i < num_app; i++) {
+        ByteSlice elf = loader_get_app_data(i);
+        TaskControlBlock task;
+        task_control_block_new(&task, elf.data, elf.len, i);
+        if (!vec_push(&global_task_manager.inner.tasks, &task)) {
+            panic("task_init: out of memory");
         }
     }
-    return false;
+    global_task_manager.inner.current_task = 0;
+    global_task_manager_initialized = true;
 }
 
-static void run_next_task() {
-    usize next;
-    if (!find_next_task(&next)) {
-        info("[kernel] All applications completed.");
-        sbi_shutdown(false);
-    }
-
-    usize current = global_task_manager.current_task;
-    global_task_manager.tasks[next].status = TASK_RUNNING;
-    global_task_manager.current_task = next;
-
-    TaskContext* current_cx = &global_task_manager.tasks[current].cx;
-    TaskContext* next_cx = &global_task_manager.tasks[next].cx;
-
-    __switch(current_cx, next_cx);
+[[noreturn]] void task_run_first_task() {
+    task_manager_run_first_task(&global_task_manager);
 }
 
-[[noreturn]] void run_first_task() {
-    global_task_manager.tasks[0].status = TASK_RUNNING;
-
-    TaskContext unused;
-    unused.ra = 0;
-    unused.sp = 0;
-    for (int i = 0; i < 12; i++) {
-        unused.s[i] = 0;
-    }
-
-    TaskContext* first_cx = &global_task_manager.tasks[0].cx;
-    __switch(&unused, first_cx);
-
-    __builtin_unreachable();
+void task_run_next_task() {
+    task_manager_run_next_task(&global_task_manager);
 }
 
 void task_suspend_current_and_run_next() {
-    global_task_manager.tasks[global_task_manager.current_task].status = TASK_READY;
-    run_next_task();
+    task_manager_mark_current_suspended(&global_task_manager);
+    task_run_next_task();
 }
 
 [[noreturn]] void task_exit_current_and_run_next() {
-    global_task_manager.tasks[global_task_manager.current_task].status = TASK_EXITED;
-    run_next_task();
+    task_manager_mark_current_exited(&global_task_manager);
+    task_run_next_task();
+    // unreachable
     __builtin_unreachable();
+}
+
+usize task_current_user_token() {
+    return task_manager_get_current_token(&global_task_manager);
+}
+
+TrapContext* task_current_trap_cx() {
+    return task_manager_get_current_trap_cx(&global_task_manager);
+}
+
+bool task_change_current_program_brk(int32_t size, usize* out) {
+    return task_manager_change_current_program_brk(&global_task_manager, size, out);
 }

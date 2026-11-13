@@ -15,6 +15,7 @@
 #include "console.h"
 #include "device_tree.h"
 #include "logging.h"
+#include "mm/heap_allocator.h"
 #include "panic.h"
 #include "task/task.h"
 #include "timer.h"
@@ -46,6 +47,7 @@ static void clear_bss() {
  */
 [[noreturn]] void kernel_main([[maybe_unused]] usize hart_id, [[maybe_unused]] usize dtb_pa) {
     clear_bss();
+    init_heap();
     log_init();
 
     trace("[kernel] Start running.");

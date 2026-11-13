@@ -9,22 +9,26 @@
     .section .text
     .globl __switch
 __switch:
-    // save current sp
+    # __switch(
+    #     current_task_cx_ptr: TaskContext*,
+    #     next_task_cx_ptr: const TaskContext*,
+    # )
+    # save kernel stack of current task
     sd sp, 8(a0)
-    // save ra and s0..s11
+    # save ra & s0~s11 of current execution
     sd ra, 0(a0)
     .set n, 0
     .rept 12
         SAVE_SN %n
         .set n, n + 1
     .endr
-    // restore ra and s0..s11 from next
+    # restore ra & s0~s11 of next execution
     ld ra, 0(a1)
     .set n, 0
     .rept 12
         LOAD_SN %n
         .set n, n + 1
     .endr
-    // restore next sp
+    # restore kernel stack of next task
     ld sp, 8(a1)
     ret
