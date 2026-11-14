@@ -1,36 +1,41 @@
 /**
  * @file sbi.h
  * @brief SBI call wrappers.
- *
- * Thin wrappers around the SBI v0.2+ interface exposed by OpenSBI.
- * All functions issue `ecall` with the appropriate extension ID and function
- * ID in a7/a6.
  */
 
 #ifndef __SBI_H_
 #define __SBI_H_
 
-#include "config.h"
+#include <stddef.h>
 
 /**
- * @brief Write one character to the console via SBI legacy extension.
+ * @brief Use SBI call to put char in console (qemu uart handler).
+ *
+ * Rust equivalent: `sbi::console_putchar`. Uses the legacy console extension
+ * `SBI_EXT_LEGACY_CONSOLE_PUTCHAR` (`a7 = 0x01`), which `sbi_rt` marks as
+ * deprecated but OpenSBI still supports.
  *
  * @param c Character (expected to be a byte; only ASCII is correct).
  */
-void sbi_console_putchar(usize c);
+void sbi_console_putchar(size_t c);
 
 /**
- * @brief Program the next timer interrupt.
+ * @brief Use SBI call to set timer.
+ *
+ * Rust equivalent: `sbi::set_timer`. Uses the SBI v0.2+ TIME extension
+ * (`a7 = "TIME"`, `a6 = 0`).
  *
  * @param timer Absolute `mtime` tick at which the timer should fire.
  */
-void sbi_set_timer(usize timer);
+void sbi_set_timer(size_t timer);
 
 /**
- * @brief Shut down the machine via SBI SRST extension.
+ * @brief Use SBI call to shutdown the kernel.
+ *
+ * Rust equivalent: `sbi::shutdown`. Uses the SBI v0.2+ SRST extension
+ * (`a7 = "SRST"`, `a6 = 0`).
  *
  * @param failure If true, report `SystemFailure`; otherwise `NoReason`.
- * @return Never returns.
  */
 [[noreturn]] void sbi_shutdown(bool failure);
 

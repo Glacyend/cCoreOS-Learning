@@ -3,12 +3,23 @@
  * @brief User-space panic handler.
  */
 
+#include "panic.h"
 #include "console.h"
-#include "lib.h"
 
 #include <stdarg.h>
+#include <stddef.h>
 
-void user_panic(const char* msg) {
-    user_printf("panic: %s\n", msg);
-    user_exit(1);
+[[noreturn]] void user_panic_raw(const char* file, int line, const char* fmt, ...) {
+    if (file != NULL) {
+        user_printf("Panicked at %s:%d : ", file, line);
+    } else {
+        user_printf("Panicked: ");
+    }
+    va_list ap;
+    va_start(ap, fmt);
+    user_vprintf(fmt, ap);
+    va_end(ap);
+    user_puts("\n");
+    // rust equivalent: `loop {}`
+    while (true) {}
 }

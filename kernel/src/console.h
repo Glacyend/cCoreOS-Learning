@@ -45,22 +45,17 @@ void console_vprintf(const char* fmt, va_list ap);
 void console_printf(const char* fmt, ...);
 
 /**
- * @brief Kernel `print!` equivalent.
+ * @brief Print string macro.
  *
- * Expands to a `console_printf` call. With no arguments, prints `fmt`
- * verbatim.
+ * Kernel `print!` equivalent. Expands to a `console_printf` call.
  */
 #define print(fmt, ...) console_printf(fmt, ##__VA_ARGS__)
 
 /**
- * @brief Kernel `println!` equivalent.
+ * @brief Println string macro.
  *
- * Same as @ref print but appends a newline.
+ * Kernel `println!` equivalent. Same as @ref print but appends a newline.
  */
-#define println(fmt, ...)                   \
-    do {                                    \
-        console_printf(fmt, ##__VA_ARGS__); \
-        console_putchar('\n');              \
-    } while (false);
+#define println(fmt, ...) console_printf(fmt "\n", ##__VA_ARGS__)
 
 #endif /* __CONSOLE_H_ */

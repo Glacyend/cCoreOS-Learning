@@ -6,7 +6,7 @@
 #ifndef __TASK_CONTEXT_H_
 #define __TASK_CONTEXT_H_
 
-#include "../config.h"
+#include <stddef.h>
 
 /**
  * @brief Task context structure containing some registers.
@@ -24,6 +24,7 @@
  */
 typedef struct {
     /** @brief Return address (e.g. `__restore`) of `__switch` ASM function. */
+<<<<<<< Updated upstream
     usize ra;
 
     /** @brief Kernel stack pointer of app. */
@@ -31,6 +32,15 @@ typedef struct {
 
     /** @brief Callee saved registers: `s0..s11`. */
     usize s[12];
+=======
+    size_t ra;
+
+    /** @brief Kernel stack pointer of app. */
+    size_t sp;
+
+    /** @brief Callee saved registers: `s0..s11`. */
+    size_t s[12];
+>>>>>>> Stashed changes
 } TaskContext;
 
 /**
@@ -58,6 +68,10 @@ TaskContext task_context_zero_init();
  * @param kstack_ptr Kernel stack pointer, typically the address of the
  *                   `TrapContext` pushed by `loader_init_app_cx`.
  */
+<<<<<<< Updated upstream
 TaskContext task_context_goto_trap_return(usize kstack_ptr);
+=======
+TaskContext task_context_goto_trap_return(size_t kstack_ptr);
+>>>>>>> Stashed changes
 
 #endif /* __TASK_CONTEXT_H_ */

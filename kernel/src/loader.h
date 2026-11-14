@@ -6,7 +6,10 @@
 #ifndef __LOADER_H_
 #define __LOADER_H_
 
+<<<<<<< Updated upstream
 #include "config.h"
+=======
+>>>>>>> Stashed changes
 #include "mm/slice.h"
 
 /**
@@ -14,7 +17,7 @@
  *
  * Rust equivalent: `loader::get_num_app`.
  */
-usize loader_get_num_app();
+size_t loader_get_num_app();
 
 /**
  * @brief Get applications data.
@@ -24,6 +27,10 @@ usize loader_get_num_app();
  *
  * @param app_id App index, 0-based.
  */
+<<<<<<< Updated upstream
 ByteSlice loader_get_app_data(usize app_id);
+=======
+ByteSlice loader_get_app_data(size_t app_id);
+>>>>>>> Stashed changes
 
 #endif /* __LOADER_H_ */

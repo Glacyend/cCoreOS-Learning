@@ -15,9 +15,16 @@
 #ifndef __TASK_H_
 #define __TASK_H_
 
+<<<<<<< Updated upstream
 #include "../config.h"
 #include "../trap/context.h"
 
+=======
+#include "../trap/context.h"
+
+#include <stdint.h>
+
+>>>>>>> Stashed changes
 /**
  * @brief Initialize the global task manager.
  *
@@ -67,7 +74,11 @@ void task_suspend_current_and_run_next();
  *
  * Rust equivalent: `current_user_token`.
  */
+<<<<<<< Updated upstream
 usize task_current_user_token();
+=======
+size_t task_current_user_token();
+>>>>>>> Stashed changes
 
 /**
  * @brief Get the current `TASK_STATUS_RUNNING` task's `TrapContext`.
@@ -85,6 +96,10 @@ TrapContext* task_current_trap_cx();
  * @param out  Receives the old program break on success.
  * @return `true` on success, `false` if the request is invalid.
  */
+<<<<<<< Updated upstream
 bool task_change_current_program_brk(int32_t size, usize* out);
+=======
+bool task_change_current_program_brk(int size, size_t* out);
+>>>>>>> Stashed changes
 
 #endif /* __TASK_H_ */

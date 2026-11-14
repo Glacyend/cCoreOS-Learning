@@ -5,28 +5,38 @@
 
 #include "syscall.h"
 
-static inline isize syscall(usize id, usize a0, usize a1, usize a2) {
-    register usize x10 __asm__("a0") = a0;
-    register usize x11 __asm__("a1") = a1;
-    register usize x12 __asm__("a2") = a2;
-    register usize x17 __asm__("a7") = id;
+/**
+ * @brief Issue an `ecall` with the given syscall number and arguments.
+ *
+ * Rust equivalent: `syscall`. `a7` holds the syscall number, `a0` / `a1` /
+ * `a2` hold the first three arguments, and `a0` receives the return value.
+ */
+static long syscall(size_t syscall_id, size_t arg0, size_t arg1, size_t arg2) {
+    register size_t x10 __asm__("a0") = arg0;
+    register size_t x11 __asm__("a1") = arg1;
+    register size_t x12 __asm__("a2") = arg2;
+    register size_t x17 __asm__("a7") = syscall_id;
     __asm__ volatile("ecall" : "+r"(x10) : "r"(x11), "r"(x12), "r"(x17) : "memory");
-    return (isize)x10;
+    return (long)x10;
 }
 
-isize sys_write(usize fd, const char* buf, usize len) {
-    return syscall(SYSCALL_WRITE, fd, (usize)buf, len);
+long sys_write(size_t fd, const char* buf, size_t len) {
+    return syscall(SYSCALL_WRITE, fd, (size_t)buf, len);
 }
 
-[[noreturn]] void sys_exit(int code) {
-    syscall(SYSCALL_EXIT, (usize)code, 0, 0);
+[[noreturn]] void sys_exit(int exit_code) {
+    syscall(SYSCALL_EXIT, (size_t)exit_code, 0, 0);
     __builtin_unreachable();
 }
 
-isize sys_yield() {
+long sys_yield() {
     return syscall(SYSCALL_YIELD, 0, 0, 0);
 }
 
-isize sys_get_time() {
+long sys_get_time() {
     return syscall(SYSCALL_GET_TIME, 0, 0, 0);
+}
+
+long sys_sbrk(int size) {
+    return syscall(SYSCALL_SBRK, (size_t)size, 0, 0);
 }

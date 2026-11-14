@@ -21,7 +21,11 @@
  *
  * Rust equivalent: `FD_STDOUT`.
  */
+<<<<<<< Updated upstream
 static const usize FD_STDOUT = 1;
+=======
+static const size_t FD_STDOUT = 1;
+>>>>>>> Stashed changes
 
 /**
  * @brief Validate that `[data, data + len)` is well-formed UTF-8.
@@ -31,11 +35,19 @@ static const usize FD_STDOUT = 1;
  * Rejects overlong encodings, surrogate code points, and code points above
  * `U+10FFFF`, matching the checks performed by Rust's `char::from_u32`.
  */
+<<<<<<< Updated upstream
 static bool utf8_validate(const uint8_t* data, usize len) {
     usize i = 0;
     while (i < len) {
         uint8_t first = data[i];
         usize seq_len;
+=======
+static bool utf8_validate(const char* data, size_t len) {
+    size_t i = 0;
+    while (i < len) {
+        uint8_t first = data[i];
+        size_t seq_len;
+>>>>>>> Stashed changes
         uint32_t codepoint;
         if ((first & 0x80) == 0) {
             seq_len = 1;
@@ -55,7 +67,11 @@ static bool utf8_validate(const uint8_t* data, usize len) {
         if (i + seq_len > len) {
             return false;
         }
+<<<<<<< Updated upstream
         for (usize k = 1; k < seq_len; k++) {
+=======
+        for (size_t k = 1; k < seq_len; k++) {
+>>>>>>> Stashed changes
             uint8_t cont = data[i + k];
             if ((cont & 0xC0) != 0x80) {
                 return false;
@@ -82,6 +98,7 @@ static bool utf8_validate(const uint8_t* data, usize len) {
     return true;
 }
 
+<<<<<<< Updated upstream
 isize sys_write(usize fd, const uint8_t* buf, usize len) {
     if (fd == FD_STDOUT) {
         Vector buffers;
@@ -93,11 +110,28 @@ isize sys_write(usize fd, const uint8_t* buf, usize len) {
                 panic("sys_write: invalid UTF-8");
             }
             for (usize j = 0; j < slice->len; j++) {
+=======
+long sys_write(size_t fd, const char* buf, size_t len) {
+    if (fd == FD_STDOUT) {
+        Vector buffers;
+        translated_byte_buffer(&buffers, task_current_user_token(), buf, len);
+        size_t buffer_count = vec_len(&buffers);
+        for (size_t i = 0; i < buffer_count; i++) {
+            const ByteSlice* slice = (const ByteSlice*)vec_get(&buffers, i);
+            if (!utf8_validate((const char*)slice->data, slice->len)) {
+                panic("sys_write: invalid UTF-8");
+            }
+            for (size_t j = 0; j < slice->len; j++) {
+>>>>>>> Stashed changes
                 console_putchar((char)slice->data[j]);
             }
         }
         vec_free(&buffers);
+<<<<<<< Updated upstream
         return (isize)len;
+=======
+        return (long)len;
+>>>>>>> Stashed changes
     } else {
         panic("Unsupported fd in sys_write!");
     }

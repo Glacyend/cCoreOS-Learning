@@ -1,9 +1,12 @@
 /**
  * @file panic.h
- * @brief Kernel panic handler.
+ * @brief The panic handler.
  *
- * Mirrors the Rust `#[panic_handler]`: prints the panic location and message,
- * then shuts the machine down with `SystemFailure`.
+ * Rust equivalent: `lang_items::panic`, the `#[panic_handler]` language item.
+ *
+ * C has no `#[panic_handler]`; panics are raised explicitly through the
+ * `panic(fmt, ...)` macro, which passes `__FILE__` and `__LINE__` to
+ * @ref panic_raw .
  */
 
 #ifndef __PANIC_H_
@@ -13,7 +16,7 @@
  * @brief Print a panic message and shut down.
  *
  * @param file Source file where the panic occurred.
- * @param line Source file where the panic occurred.
+ * @param line Source line where the panic occurred.
  * @param fmt  Format string for the panic message.
  * @param ...  Variadic arguments.
  */
@@ -31,7 +34,7 @@
  *
  * Usage: `assert(ptr != NULL);`
  */
-#define assert_panic(cond)                              \
+#define assert_panic(cond)                        \
     do {                                          \
         if (!(cond)) {                            \
             panic("assertion failed: %s", #cond); \

@@ -1,6 +1,6 @@
 /**
  * @file device_tree.c
- * @brief Minimal FDT parser.
+ * @brief Device tree helpers.
  *
  * FDT layout (all multi-byte fields are big-endian):
  *
@@ -23,6 +23,10 @@
  *
  * We only need to find a property called `timebase-frequency`, which in QEMU
  * virt lives under `/cpus`.
+ *
+ * Rust uses `Atomicsize_t` + `Ordering::Relaxed` to satisfy Rust's `Sync`
+ * requirement for `static`; C uses a plain `size_t` since the kernel is
+ * single-core.
  */
 
 #include "device_tree.h"
@@ -41,12 +45,16 @@
 
 /** @brief Parsed header fields we care about. */
 typedef struct {
-    usize off_struct; /**< Offset from DTB base to structure block. */
-    usize off_strings; /**< Offset from DTB base to strings block. */
+    size_t off_struct; /**< Offset from DTB base to structure block. */
+    size_t off_strings; /**< Offset from DTB base to strings block. */
 } FdtHeader;
 
-/** @brief Clock frequency in Hz; 0 until @ref device_tree_init . */
-static usize global_clock_freq = 0;
+/**
+ * @brief Clock frequency in Hz; 0 until @ref device_tree_init .
+ *
+ * Rust equivalent: `CLOCK_FREQ`.
+ */
+static size_t global_clock_freq = 0;
 
 /**
  * @brief Read a big-endian 32-bit value.
@@ -66,7 +74,7 @@ static inline unsigned int read_be32(const unsigned char* p) {
  * @param out    Receives the parsed offsets.
  * @return 0 on success, -1 on bad magic.
  */
-static int parse_header(usize dtb_pa, FdtHeader* out) {
+static int parse_header(size_t dtb_pa, FdtHeader* out) {
     const unsigned char* base = (const unsigned char*)dtb_pa;
 
     if (read_be32(base + 0) != FDT_MAGIC) {
@@ -130,7 +138,7 @@ static unsigned int find_timebase_freq(const unsigned char* base, const FdtHeade
                 ptr++;
             }
             ptr++;
-            ptr = (const unsigned char*)(((usize)ptr + 3) & ~(usize)3);
+            ptr = (const unsigned char*)(((size_t)ptr + 3) & ~(size_t)3);
             depth++;
         } else if (token == FDT_END_NODE) {
             depth--;
@@ -149,7 +157,7 @@ static unsigned int find_timebase_freq(const unsigned char* base, const FdtHeade
                 return read_be32(ptr);
             }
             ptr += len;
-            ptr = (const unsigned char*)(((usize)ptr + 3) & ~(usize)3);
+            ptr = (const unsigned char*)(((size_t)ptr + 3) & ~(size_t)3);
         } else if (token == FDT_NOP) {
             // skip
         } else if (token == FDT_END) {
@@ -160,7 +168,7 @@ static unsigned int find_timebase_freq(const unsigned char* base, const FdtHeade
     }
 }
 
-int device_tree_init(usize dtb_pa) {
+int device_tree_init(size_t dtb_pa) {
     const unsigned char* base = (const unsigned char*)dtb_pa;
     FdtHeader header;
 
@@ -175,12 +183,12 @@ int device_tree_init(usize dtb_pa) {
         return -1;
     }
 
-    global_clock_freq = (usize)freq;
+    global_clock_freq = (size_t)freq;
     info("[kernel] CLOCK_FREQ from device tree: %lu", (unsigned long)global_clock_freq);
     return 0;
 }
 
-usize device_tree_clock_freq() {
+size_t device_tree_clock_freq() {
     assert_panic(global_clock_freq != 0);
     return global_clock_freq;
 }

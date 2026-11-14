@@ -6,7 +6,7 @@
 #ifndef __SYSCALL_PROCESS_H_
 #define __SYSCALL_PROCESS_H_
 
-#include "../config.h"
+#include <stdint.h>
 
 /**
  * @brief Task exits and submit an exit code.
@@ -22,7 +22,24 @@
  *
  * Rust equivalent: `sys_yield`.
  */
-isize sys_yield();
+long sys_yield();
+
+/**
+ * @brief Get current time.
+ *
+ * Rust equivalent: `sys_get_time`.
+ */
+long sys_get_time();
+
+/**
+ * @brief Change data segment size.
+ *
+ * Rust equivalent: `sys_sbrk`.
+ *
+ * @param size Signed delta for the program break.
+ * @return The old program break on success, or -1 on failure.
+ */
+long sys_sbrk(int size);
 
 /**
  * @brief Get current time.

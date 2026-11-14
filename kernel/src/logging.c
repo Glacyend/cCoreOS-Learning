@@ -1,6 +1,6 @@
 /**
  * @file logging.c
- * @brief Leveled logging for the kernel.
+ * @brief The logging system.
  */
 
 #include "logging.h"
@@ -12,7 +12,11 @@
 #define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
 #endif /* LOG_LEVEL_DEFAULT */
 
-/** @brief Current maximum enabled log level. */
+/**
+ * @brief Current maximum enabled log level.
+ *
+ * Rust equivalent: the global `max_level` inside the `log` crate.
+ */
 static LogLevel global_max_level = LOG_LEVEL_DEFAULT;
 
 void log_init() {
@@ -38,11 +42,11 @@ LogLevel log_get_max_level() {
  */
 static int level_color(LogLevel level) {
     switch (level) {
-        case LOG_LEVEL_ERROR: return 31;
-        case LOG_LEVEL_WARN: return 93;
-        case LOG_LEVEL_INFO: return 34;
-        case LOG_LEVEL_DEBUG: return 32;
-        case LOG_LEVEL_TRACE: return 90;
+        case LOG_LEVEL_ERROR: return 31;  //red
+        case LOG_LEVEL_WARN: return 93;  // bright yellow
+        case LOG_LEVEL_INFO: return 34;  // blue
+        case LOG_LEVEL_DEBUG: return 32;  // green
+        case LOG_LEVEL_TRACE: return 90;  // bright black
         default: return 0;
     }
 }

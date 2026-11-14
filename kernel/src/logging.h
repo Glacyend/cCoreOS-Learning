@@ -1,12 +1,12 @@
 /**
  * @file logging.h
- * @brief Leveled logging for the kernel.
+ * @brief The logging system.
  *
- * Mirrors the Rust `logging.rs`: each message is prefixed with an
- * ANSI-colored, centered level tag and followed by a newline.
- *
- * The maximum level is a compile-time option `LOG_LEVEL` (0..4). If not
- * defined, defaults to `2` (INFO).
+ * Rust equivalent: `logging.rs`. The `log::Log` trait and `log` macros are
+ * replaced by the C `log_write` function and the `log_error` / `log_warn` /
+ * ... macros below. The compile-time environment variable `LOG` is mapped to
+ * the `LOG_LEVEL_DEFAULT` macro, which `kernel/CMakeLists.txt` sets from the
+ * `LOG_LEVEL` cache variable.
  */
 
 #ifndef __LOGGING_H_
@@ -23,10 +23,10 @@
 typedef int LogLevel;
 
 /**
- * @brief Initialize the logging subsystem.
+ * @brief Initialize the logging system.
  *
- * Sets the maximum level from the compile-time @c LOG_LEVEL_DEFAULT macro
- * (defaults to @ref LOG_LEVEL_INFO ).
+ * Rust equivalent: `logging::init`. Sets the maximum level from the
+ * compile-time @c LOG_LEVEL_DEFAULT macro (defaults to @ref LOG_LEVEL_INFO ).
  */
 void log_init();
 

@@ -6,7 +6,7 @@
 #ifndef __SYSCALL_FS_H_
 #define __SYSCALL_FS_H_
 
-#include "../config.h"
+#include <stddef.h>
 
 /**
  * @brief Write `buf` of length `len` to a file with `fd`.
@@ -22,6 +22,10 @@
  * @param len Number of bytes to read.
  * @return `len` on success, or -1 on error.
  */
+<<<<<<< Updated upstream
 isize sys_write(usize fd, const uint8_t* buf, usize len);
+=======
+long sys_write(size_t fd, const char* buf, size_t len);
+>>>>>>> Stashed changes
 
 #endif /* __SYSCALL_FS_H_ */

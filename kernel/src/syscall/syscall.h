@@ -15,7 +15,7 @@
 #ifndef __SYSCALL_H_
 #define __SYSCALL_H_
 
-#include "../config.h"
+#include <stddef.h>
 
 /** @brief Syscall number for `write`. */
 #define SYSCALL_WRITE 64
@@ -43,6 +43,10 @@
  * @param arg2       Third argument (`a2`).
  * @return Value to be written back into `a0`.
  */
+<<<<<<< Updated upstream
 isize syscall_dispatch(usize syscall_id, usize arg0, usize arg1, usize arg2);
+=======
+long syscall_dispatch(size_t syscall_id, size_t arg0, size_t arg1, size_t arg2);
+>>>>>>> Stashed changes
 
 #endif /* __SYSCALL_H_ */

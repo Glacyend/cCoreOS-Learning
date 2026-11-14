@@ -6,7 +6,7 @@
 #ifndef __TRAP_CONTEXT_H_
 #define __TRAP_CONTEXT_H_
 
-#include "../config.h"
+#include <stddef.h>
 
 /**
  * @brief Trap context structure containing `sstatus`, `sepc` and registers.
@@ -30,6 +30,7 @@
  */
 typedef struct {
     /** @brief General regs[0..31]. */
+<<<<<<< Updated upstream
     usize x[32];
 
     /** @brief CSR sstatus. */
@@ -46,6 +47,24 @@ typedef struct {
 
     /** @brief Addr of `trap_handler` function. */
     usize trap_handler;
+=======
+    size_t x[32];
+
+    /** @brief CSR sstatus. */
+    size_t sstatus;
+
+    /** @brief CSR sepc. */
+    size_t sepc;
+
+    /** @brief Addr of `PageTable`. */
+    size_t kernel_satp;
+
+    /** @brief Kernel stack. */
+    size_t kernel_sp;
+
+    /** @brief Addr of `trap_handler` function. */
+    size_t trap_handler;
+>>>>>>> Stashed changes
 } TrapContext;
 
 /**
@@ -53,7 +72,11 @@ typedef struct {
  *
  * Rust equivalent: `TrapContext::set_sp`.
  */
+<<<<<<< Updated upstream
 void trap_context_set_sp(TrapContext* ctx, usize sp);
+=======
+void trap_context_set_sp(TrapContext* ctx, size_t sp);
+>>>>>>> Stashed changes
 
 /**
  * @brief Init app context.
@@ -72,7 +95,11 @@ void trap_context_set_sp(TrapContext* ctx, usize sp);
  * @return The initialized `TrapContext`.
  */
 TrapContext trap_context_app_init_context(
+<<<<<<< Updated upstream
     usize entry, usize sp, usize kernel_satp, usize kernel_sp, usize trap_handler
+=======
+    size_t entry, size_t sp, size_t kernel_satp, size_t kernel_sp, size_t trap_handler
+>>>>>>> Stashed changes
 );
 
 #endif /* __TRAP_CONTEXT_H_ */

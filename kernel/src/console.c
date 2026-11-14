@@ -10,7 +10,7 @@
 #include <stddef.h>
 
 void console_putchar(char c) {
-    sbi_console_putchar((usize)(unsigned char)c);
+    sbi_console_putchar((size_t)(unsigned char)c);
 }
 
 void console_write(const char* s) {
@@ -125,6 +125,10 @@ void console_vprintf(const char* fmt, va_list ap) {
             }
             case 'l': {
                 fmt++;
+                if (*fmt == '\0') {
+                    console_write("%l");
+                    return;
+                }
                 switch (*fmt) {
                     case 'd':
                     case 'i': {
@@ -145,6 +149,10 @@ void console_vprintf(const char* fmt, va_list ap) {
                     }
                     case 'l': {
                         fmt++;
+                        if (*fmt == '\0') {
+                            console_write("%ll");
+                            return;
+                        }
                         switch (*fmt) {
                             case 'd':
                             case 'i': {
@@ -185,22 +193,26 @@ void console_vprintf(const char* fmt, va_list ap) {
             }
             case 'z': {
                 fmt++;
+                if (*fmt == '\0') {
+                    console_write("%z");
+                    return;
+                }
                 switch (*fmt) {
                     case 'u': {
-                        print_unsigned((unsigned long)va_arg(ap, usize), 10, false);
+                        print_unsigned((unsigned long)va_arg(ap, size_t), 10, false);
                         break;
                     }
                     case 'd':
                     case 'i': {
-                        print_signed((long)va_arg(ap, isize));
+                        print_signed((long)va_arg(ap, long));
                         break;
                     }
                     case 'x': {
-                        print_unsigned((unsigned long)va_arg(ap, usize), 16, false);
+                        print_unsigned((unsigned long)va_arg(ap, size_t), 16, false);
                         break;
                     }
                     case 'X': {
-                        print_unsigned((unsigned long)va_arg(ap, usize), 16, true);
+                        print_unsigned((unsigned long)va_arg(ap, size_t), 16, true);
                         break;
                     }
                     default: {

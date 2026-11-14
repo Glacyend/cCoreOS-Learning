@@ -13,11 +13,12 @@
     task_exit_current_and_run_next();
 }
 
-isize sys_yield() {
+long sys_yield() {
     task_suspend_current_and_run_next();
     return 0;
 }
 
+<<<<<<< Updated upstream
 isize sys_get_time() {
     return (isize)timer_get_time_ms();
 }
@@ -26,6 +27,16 @@ isize sys_sbrk(int32_t size) {
     usize old_brk;
     if (task_change_current_program_brk(size, &old_brk)) {
         return (isize)old_brk;
+=======
+long sys_get_time() {
+    return (long)timer_get_time_ms();
+}
+
+long sys_sbrk(int size) {
+    size_t old_brk;
+    if (task_change_current_program_brk(size, &old_brk)) {
+        return (long)old_brk;
+>>>>>>> Stashed changes
     } else {
         return -1;
     }

@@ -20,6 +20,10 @@ set(KERNEL_SOURCES
     src/mm/heap_allocator.c
     src/mm/map.c
     src/mm/memory_set.c
+<<<<<<< Updated upstream
+=======
+    src/mm/mm.c
+>>>>>>> Stashed changes
     src/mm/page_table.c
     src/mm/vec.c
     src/panic.c
@@ -29,6 +33,7 @@ set(KERNEL_SOURCES
     src/syscall/syscall.c
     src/task/context.c
     src/task/switch.S
+    src/task/task_inner.c
     src/task/task.c
     src/task/task_inner.c
     src/timer.c

@@ -8,28 +8,38 @@
 #include "sbi.h"
 
 /**
- * @brief Read `mtime` via the `rdtime` instruction.
+ * @brief Timer interrupts per second.
  *
- * `rdtime` is available in S-mode in all RISC-V platforms that expose the
- * `time` CSR.
- *
- * @return The current `mtime` value.
+ * Rust equivalent: `TICKS_PER_SEC`.
  */
-static inline usize read_mtime() {
-    usize t;
+static const size_t TICKS_PER_SEC = 100;
+
+/**
+ * @brief Milliseconds per second.
+ *
+ * Rust equivalent: `MSEC_PER_SEC`.
+ */
+static const size_t MSEC_PER_SEC = 1000;
+
+/**
+ * @brief Read the `time` CSR via the `rdtime` instruction.
+ *
+ * Rust equivalent: `riscv::register::time::read`.
+ */
+static inline size_t read_mtime() {
+    size_t t;
     __asm__ volatile("rdtime %0" : "=r"(t));
     return t;
 }
 
-usize timer_get_time() {
+size_t timer_get_time() {
     return read_mtime();
 }
 
-usize timer_get_time_ms() {
+size_t timer_get_time_ms() {
     return read_mtime() / (device_tree_clock_freq() / MSEC_PER_SEC);
 }
 
 void timer_set_next_trigger() {
-    usize next = read_mtime() + device_tree_clock_freq() / TICKS_PER_SEC;
-    sbi_set_timer(next);
+    sbi_set_timer(timer_get_time() + device_tree_clock_freq() / TICKS_PER_SEC);
 }

@@ -26,6 +26,8 @@ build:
 	@$(CMAKE) --build $(BUILD_DIR)
 
 run: build
+	@echo ">>> Checking QEMU"
+	@sh tools/qemu-ver-check.sh $(QEMU)
 	@echo ">>> Starting QEMU"
 	@$(QEMU) $(QEMU_ARGS)
 

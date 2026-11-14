@@ -1,22 +1,31 @@
 /**
  * @file main.c
- * @brief Kernel entry point and high-level initialization.
+ * @brief The main module and entrypoint.
  *
- * Reached from `entry.S` after the boot stack is set up. The order of
- * initialization mirrors the Rust version:
+ * Various facilities of the kernels are implemented as submodules. The most
+ * important ones are:
  *
- *   clear_bss() -> logging -> device_tree -> mm -> trap -> timer -> task_init
+ * - `trap`: Handles all cases of switching from userspace to the kernel.
+ * - `task`: Task management.
+ * - `syscall`: System call handling and implementation.
  *
- * Cooperative round-robin scheduler. Every app is loaded once at startup, then
- * tasks switch on `sys_yield`/`sys_exit`.
+ * The operating system also starts in this module. Kernel code starts
+ * executing from `entry.S`, after which `kernel_main()` is called to
+ * initialize various pieces of functionality. (See its source code for
+ * details.)
+ *
+ * We then call `task_run_first_task()` and for the first time go to userspace.
  */
 
-#include "config.h"
 #include "console.h"
 #include "device_tree.h"
 #include "logging.h"
+<<<<<<< Updated upstream
 #include "mm/heap_allocator.h"
 #include "panic.h"
+=======
+#include "mm/mm.h"
+>>>>>>> Stashed changes
 #include "task/task.h"
 #include "timer.h"
 #include "trap/trap.h"
@@ -26,29 +35,32 @@ extern char sbss[];
 extern char ebss[];
 
 /**
- * @brief Clear the kernel .bss segment (excluding the boot stack).
+ * @brief Clear BSS segment.
  *
- * The boot stack lives in .bss.stack, which is placed *before* `sbss` by the
- * linker script, so this loop never touches the stack we are currently running
- * on.
+ * Rust equivalent: `clear_bss`. `sbss` and `ebss` are linker script symbols;
+ * the range `sbss..ebss` excludes `.bss.stack`, so the boot stack in use is
+ * not zeroed.
  */
 static void clear_bss() {
     for (char* p = sbss; p < ebss; p++) {
-        *p = 0;
+        *(volatile char*)p = 0;
     }
 }
 
 /**
- * @brief Rust-style kernel entry point.
+ * @brief The C entry-point of OS.
  *
- * @param hart_id Hard id passed by OpenSBI in a0.
- * @param dtb_pa  Physical address of the device tree passed in a1.
- * @return Never returns.
+ * Rust equivalent: `rust_main`. `entry.S` calls this after setting `sp` to
+ * `boot_stack_top`.
+ *
+ * @param hart_id Hard id passed by OpenSBI in `a0`.
+ * @param dtb_pa  Physical address of the device tree passed in `a1`.
  */
-[[noreturn]] void kernel_main([[maybe_unused]] usize hart_id, [[maybe_unused]] usize dtb_pa) {
+[[noreturn]] void kernel_main([[maybe_unused]] size_t hart_id, [[maybe_unused]] size_t dtb_pa) {
     clear_bss();
     init_heap();
     log_init();
+    device_tree_init(dtb_pa);
 
     trace("[kernel] Start running.");
 
@@ -64,15 +76,11 @@ static void clear_bss() {
 
     println("[kernel] Welcome to cCoreOS!");
 
-    if (device_tree_init(dtb_pa) != 0) {
-        panic("[kernel] Device tree init failed.");
-    }
-
+    mm_init();
     trap_init();
+    // trap_enable_interrupt();
     trap_enable_timer_interrupt();
-
     timer_set_next_trigger();
-
     task_init();
-    run_first_task();
+    task_run_first_task();
 }
